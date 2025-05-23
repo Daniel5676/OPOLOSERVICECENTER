@@ -43,22 +43,47 @@
       scroll-behavior: smooth;
     }
 
-    /* Background Video */
+    /* Background Video (Iframe) */
     .video-background {
       position: fixed;
       top: 0;
       left: 0;
-      width: 100%;
-      height: 100%;
+      width: 100vw;
+      height: 100vh;
       z-index: -2;
       overflow: hidden;
     }
 
-    .video-background video {
+    .video-background iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
       width: 100%;
       height: 100%;
-      object-fit: cover;
-      filter: brightness(0.8) contrast(1.1);
+      min-width: 100vw; /* Ensures iframe spans full viewport width */
+      min-height: 100vh; /* Ensures iframe spans full viewport height */
+      object-fit: cover; /* Attempts to mimic video behavior */
+      filter: brightness(0.8) contrast(1.1); /* Matches original video filter */
+      transform: translateZ(0); /* Improves rendering performance */
+    }
+
+    /* Ensure iframe scales correctly for different aspect ratios */
+    @media (min-aspect-ratio: 16/9) {
+      .video-background iframe {
+        height: 100vh;
+        width: calc(100vh * 16 / 9);
+        left: 50%;
+        transform: translateX(-50%);
+      }
+    }
+
+    @media (max-aspect-ratio: 16/9) {
+      .video-background iframe {
+        width: 100vw;
+        height: calc(100vw * 9 / 16);
+        top: 50%;
+        transform: translateY(-50%);
+      }
     }
 
     /* Fallback background for when video doesn't load */
@@ -66,8 +91,8 @@
       position: fixed;
       top: 0;
       left: 0;
-      width: 100%;
-      height: 100%;
+      width: 100vw;
+      height: 100vh;
       background: var(--gradient-1);
       z-index: -3;
     }
@@ -77,8 +102,8 @@
       position: fixed;
       top: 0;
       left: 0;
-      width: 100%;
-      height: 100%;
+      width: 100vw;
+      height: 100vh;
       background: linear-gradient(
         45deg,
         rgba(76, 0, 130, 0.75),
@@ -474,12 +499,15 @@
   <!-- Fallback background if video fails to load -->
   <div class="fallback-background"></div>
 
-  <!-- Video Background -->
+  <!-- Video Background (Vimeo Iframe) -->
   <div class="video-background">
-    <video autoplay muted loop playsinline>
-      <source src="https://player.vimeo.com/video/1086939552?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" type="video/mp4">
-      Your browser does not support the video tag. Please try a different browser or contact support.
-    </video>
+    <iframe 
+      id="vimeo-player"
+      src="https://player.vimeo.com/video/1086939552?autoplay=1&loop=1&muted=1&background=1&badge=0&autopause=0&player_id=0&app_id=58479" 
+      frameborder="0" 
+      allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media" 
+      title="0521">
+    </iframe>
   </div>
 
   <!-- Animated Gradient Overlay -->
@@ -524,9 +552,33 @@
     </footer>
   </main>
 
+  <!-- Vimeo Player API -->
+  <script src="https://player.vimeo.com/api/player.js"></script>
+
   <!-- Animation JavaScript -->
   <script>
     document.addEventListener('DOMContentLoaded', function() {
+      // Initialize Vimeo Player
+      const iframe = document.getElementById('vimeo-player');
+      const player = new Vimeo.Player(iframe);
+
+      // Ensure video autoplays, loops, and is muted
+      player.setVolume(0); // Mute the video
+      player.setLoop(true); // Enable looping
+      player.play().catch((error) => {
+        console.error('Vimeo autoplay failed:', error);
+      });
+
+      // Log player errors
+      player.on('error', (error) => {
+        console.error('Vimeo player error:', error);
+      });
+
+      // Log when video starts playing
+      player.on('play', () => {
+        console.log('Vimeo video is playing');
+      });
+
       // Wait 1.5 seconds after page load
       setTimeout(function() {
         // Animate profile title
@@ -580,7 +632,7 @@
           const posY = 100;
           
           bubble.style.left = `${posX}%`;
-          bubble.style.top = `${posY}%`;
+          bucket.style.top = `${posY}%`;
           
           const animDuration = Math.random() * 2 + 2;
           bubble.style.animation = `float ${animDuration}s ease-in-out`;
