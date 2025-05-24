@@ -43,47 +43,22 @@
       scroll-behavior: smooth;
     }
 
-    /* Background Video (Iframe) */
+    /* Background Video */
     .video-background {
       position: fixed;
       top: 0;
       left: 0;
-      width: 100vw;
-      height: 100vh;
+      width: 100%;
+      height: 100%;
       z-index: -2;
       overflow: hidden;
     }
 
-    .video-background iframe {
-      position: absolute;
-      top: 0;
-      left: 0;
+    .video-background video {
       width: 100%;
       height: 100%;
-      min-width: 100vw; /* Ensures iframe spans full viewport width */
-      min-height: 100vh; /* Ensures iframe spans full viewport height */
-      object-fit: cover; /* Attempts to mimic video behavior */
-      filter: brightness(0.8) contrast(1.1); /* Matches original video filter */
-      transform: translateZ(0); /* Improves rendering performance */
-    }
-
-    /* Ensure iframe scales correctly for different aspect ratios */
-    @media (min-aspect-ratio: 16/9) {
-      .video-background iframe {
-        height: 100vh;
-        width: calc(100vh * 16 / 9);
-        left: 50%;
-        transform: translateX(-50%);
-      }
-    }
-
-    @media (max-aspect-ratio: 16/9) {
-      .video-background iframe {
-        width: 100vw;
-        height: calc(100vw * 9 / 16);
-        top: 50%;
-        transform: translateY(-50%);
-      }
+      object-fit: cover;
+      filter: brightness(0.8) contrast(1.1);
     }
 
     /* Fallback background for when video doesn't load */
@@ -91,8 +66,8 @@
       position: fixed;
       top: 0;
       left: 0;
-      width: 100vw;
-      height: 100vh;
+      width: 100%;
+      height: 100%;
       background: var(--gradient-1);
       z-index: -3;
     }
@@ -102,8 +77,8 @@
       position: fixed;
       top: 0;
       left: 0;
-      width: 100vw;
-      height: 100vh;
+      width: 100%;
+      height: 100%;
       background: linear-gradient(
         45deg,
         rgba(76, 0, 130, 0.75),
@@ -210,8 +185,8 @@
 
     .profile-title {
       text-align: center;
-      opacity: 0;
-      transform: translateY(-50px);
+      opacity: 0; /* Initially hidden for animation */
+      transform: translateY(-50px); /* Initial position for animation */
       transition: all 1s ease-out;
     }
 
@@ -346,6 +321,8 @@
       box-shadow: var(--shadow-md);
       border-left: 4px solid transparent;
       letter-spacing: 0.5px;
+      
+      /* Initial state for animation */
       opacity: 0;
       transform: translateX(-100px);
     }
@@ -431,7 +408,7 @@
 
     .bubble-word {
       display: inline-block;
-      margin-right: 0.4em;
+      margin-right: 0.4em; /* Add space between words */
     }
 
     .bubble-letter {
@@ -445,7 +422,7 @@
         transform: translateY(0);
       }
       50% {
-        transform: translateY(-3px);
+        transform: translateY(-3px); /* Reduced from -5px for subtler movement */
       }
     }
 
@@ -499,21 +476,18 @@
   <!-- Fallback background if video fails to load -->
   <div class="fallback-background"></div>
 
-  <!-- Video Background (Vimeo Iframe) -->
+  <!-- Video Background -->
   <div class="video-background">
-    <iframe 
-      id="vimeo-player"
-      src="https://player.vimeo.com/video/1086939552?autoplay=1&loop=1&muted=1&background=1&badge=0&autopause=0&player_id=0&app_id=58479" 
-      frameborder="0" 
-      allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media" 
-      title="0521">
-    </iframe>
+    <video autoplay muted loop playsinline>
+      <source src="https://v1.pinimg.com/videos/iht/720p/5f/e1/36/5fe13606be299536880640975a1389f1.mp4" type="video/mp4">
+      <!-- Fallback to image if video doesn't load -->
+    </video>
   </div>
 
   <!-- Animated Gradient Overlay -->
   <div class="overlay"></div>
 
-  <main class="container">
+ <main class="container">
     <!-- Profile Section -->
     <section class="profile">
       <div class="profile-image">
@@ -546,40 +520,16 @@
       </a>
     </section>
 
-    <!-- Footer -->
+   <!-- Footer -->
     <footer class="footer">
       <p>© 2025 Labak's Digital Print. All rights reserved.</p>
     </footer>
   </main>
 
-  <!-- Vimeo Player API -->
-  <script src="https://player.vimeo.com/api/player.js"></script>
-
   <!-- Animation JavaScript -->
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      // Initialize Vimeo Player
-      const iframe = document.getElementById('vimeo-player');
-      const player = new Vimeo.Player(iframe);
-
-      // Ensure video autoplays, loops, and is muted
-      player.setVolume(0); // Mute the video
-      player.setLoop(true); // Enable looping
-      player.play().catch((error) => {
-        console.error('Vimeo autoplay failed:', error);
-      });
-
-      // Log player errors
-      player.on('error', (error) => {
-        console.error('Vimeo player error:', error);
-      });
-
-      // Log when video starts playing
-      player.on('play', () => {
-        console.log('Vimeo video is playing');
-      });
-
-      // Wait 1.5 seconds after page load
+      // Wait 1.5 seconds after page load (reduced from 2s for better UX)
       setTimeout(function() {
         // Animate profile title
         const profileTitle = document.querySelector('.profile-title');
@@ -594,8 +544,10 @@
         
         // Animate each link with a slight delay between them
         links.forEach((link, index) => {
+          // Set initial position based on direction
           const direction = directions[index % directions.length];
           
+          // Set initial transform based on direction
           switch(direction) {
             case 'top':
               link.style.transform = 'translateY(-100px)';
@@ -611,46 +563,56 @@
               break;
           }
           
+          // Add a small delay for each link to create a staggered effect
           setTimeout(() => {
             link.style.opacity = '1';
             link.style.transform = 'translate(0, 0)';
-          }, index * 150);
+          }, index * 150); // 150ms delay between each link (reduced from 200ms)
         });
 
         // Create bubble animation for the freelancer heading
         const freelancerHeading = document.getElementById('freelancer-heading');
         
+        // Function to create a bubble
         function createBubble() {
           const bubble = document.createElement('div');
           bubble.classList.add('bubble');
           
+          // Random size between 10px and 30px
           const size = Math.random() * 20 + 10;
           bubble.style.width = `${size}px`;
           bubble.style.height = `${size}px`;
           
+          // Random position along the width of the heading
           const posX = Math.random() * 100;
+          // Position at the bottom of the heading
           const posY = 100;
           
           bubble.style.left = `${posX}%`;
-          bucket.style.top = `${posY}%`;
+          bubble.style.top = `${posY}%`;
           
+          // Set animation duration between 2-4 seconds
           const animDuration = Math.random() * 2 + 2;
           bubble.style.animation = `float ${animDuration}s ease-in-out`;
           
+          // Append bubble to heading
           freelancerHeading.appendChild(bubble);
           
+          // Remove bubble after animation completes
           setTimeout(() => {
             bubble.remove();
           }, animDuration * 1000);
         }
         
+        // Create bubbles at random intervals
         setInterval(createBubble, 300);
         
+        // Create initial set of bubbles
         for (let i = 0; i < 5; i++) {
           setTimeout(createBubble, i * 300);
         }
         
-      }, 1500);
+      }, 1500); // 1.5 seconds delay after page load
       
       // Add hover effect to profile image
       const profileImage = document.querySelector('.profile-image img');
@@ -662,7 +624,8 @@
         this.style.transform = 'scale(1) rotate(0deg)';
       });
 
-      // Floating Scroll Animation
+      // ===== FLOATING SCROLL ANIMATION =====
+      // Using Intersection Observer for better performance
       const scrollElements = document.querySelectorAll('.scroll-animate');
       
       const elementInView = (el, dividend = 1) => {
@@ -691,33 +654,41 @@
         });
       };
       
+      // Initialize scroll animation
       window.addEventListener('scroll', () => {
         handleScrollAnimation();
       });
       
+      // Trigger once on load
       handleScrollAnimation();
       
-      // Bubble Text Animation
+      // ===== BUBBLE TEXT ANIMATION =====
+      // Split text into words and characters for bubble animation with proper spacing
       const bubbleTextElements = document.querySelectorAll('.bubble-text');
       
       bubbleTextElements.forEach(element => {
         const text = element.textContent;
         element.textContent = '';
         
+        // Split text into words
         const words = text.split(' ');
         
+        // Process each word
         words.forEach((word, wordIndex) => {
           const wordSpan = document.createElement('span');
           wordSpan.classList.add('bubble-word');
           
+          // Create spans for each character in the word
           for (let i = 0; i < word.length; i++) {
             const charSpan = document.createElement('span');
             charSpan.classList.add('bubble-letter');
             charSpan.textContent = word[i];
             
-            const delay = Math.random() * 3 + 1;
-            const duration = 3 + Math.random() * 2;
+            // Set random animation delay for each character (slower)
+            const delay = Math.random() * 3 + 1; // Increased delay (1-4s)
+            const duration = 3 + Math.random() * 2; // Increased duration (3-5s)
             
+            // Apply slower animation
             charSpan.style.animation = `bubbleFloat ${duration}s ease-in-out ${delay}s infinite`;
             
             wordSpan.appendChild(charSpan);
@@ -725,6 +696,7 @@
           
           element.appendChild(wordSpan);
           
+          // Add a space after each word except the last one
           if (wordIndex < words.length - 1) {
             const space = document.createTextNode(' ');
             element.appendChild(space);
@@ -743,18 +715,20 @@
           window.requestAnimationFrame(function() {
             const scrollDirection = scrollTop > lastScrollTop ? 'down' : 'up';
             const scrollDiff = Math.abs(scrollTop - lastScrollTop);
-            const scrollFactor = Math.min(scrollDiff / 50, 1);
+            const scrollFactor = Math.min(scrollDiff / 50, 1); // Limit the effect
             
+            // Apply floating effect to elements based on scroll direction and speed
             document.querySelectorAll('.scroll-animate.active').forEach(element => {
-              const randomOffset = (Math.random() - 0.5) * 3 * scrollFactor;
+              const randomOffset = (Math.random() - 0.5) * 3 * scrollFactor; // Reduced from 5 to 3
               const verticalOffset = scrollDirection === 'down' ? 
-                -3 * scrollFactor : 3 * scrollFactor;
+                -3 * scrollFactor : 3 * scrollFactor; // Reduced from 5 to 3
               
               element.style.transform = `translate(${randomOffset}px, ${verticalOffset}px)`;
               
+              // Reset transform after a short delay for smooth effect
               setTimeout(() => {
                 element.style.transform = 'translate(0, 0)';
-              }, 500);
+              }, 500); // Increased from 300 to 500 for slower movement
             });
             
             lastScrollTop = scrollTop;
